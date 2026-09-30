@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BADMINTON SMART LEARNING - PJOK KELAS XII</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js for Teacher Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .shuttlecock-anim {
+            animation: floatShuttle 3s ease-in-out infinite;
+        }
+
+        @keyframes floatShuttle {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(8deg); }
+        }
+
+        .court-bg {
+            background-color: #065f46;
+            background-image: radial-gradient(#10b981 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-slate-900">
+
+    <!-- HEADER NAVBAR -->
+    <header class="sticky top-0 z-40 bg-navy-900/90 backdrop-blur-md border-b border-slate-800 shadow-xl no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo & Title -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('beranda')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold-500 to-amber-300 flex items-center justify-center text-navy-950 font-extrabold shadow-lg shadow-gold-500/20">
+                        <i class="fa-solid font-black text-xl">🏸</i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 bg-clip-text text-transparent leading-tight">
+                            BADMINTON SMART LEARNING
+                        </h1>
+                        <p class="text-xs text-slate-400 font-medium">PJOK KELAS XII SMA</p>
+                    </div>
+                </div>
+
+                <!-- Overall Progress Indicator -->
+                <div class="hidden md:flex items-center space-x-4 bg-slate-800/80 px-4 py-2 rounded-full border border-slate-700/50">
+                    <div class="text-xs font-semibold text-slate-300">Progres Belajar:</div>
+                    <div class="w-32 bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-2.5 rounded-full w-0 transition-all duration-500"></div>
+                    </div>
+                    <span id="overall-progress-text" class="text-xs font-bold text-gold-400">0%</span>
+                </div>
+
+                <!-- Mobile Menu Button & Teacher Toggle -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="promptTeacherMode()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 transition flex items-center space-x-1">
+                        <i class="fa-solid fa-user-tie"></i>
+                        <span class="hidden sm:inline">Mode Guru</span>
+                    </button>
+                    <button id="mobile-menu-btn" onclick="toggleMobileNav()" class="md:hidden p-2 text-slate-300 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Navigation Tabs (Desktop & Tablet) -->
+        <nav class="hidden md:block bg-slate-950/80 border-t border-slate-800/60 px-4">
+            <div class="max-w-7xl mx-auto flex space-x-1 overflow-x-auto py-2 scrollbar-none text-sm font-medium">
+                <button onclick="switchTab('beranda')" id="nav-beranda" class="nav-link px-4 py-2 rounded-lg transition whitespace-nowrap text-amber-400 bg-slate-800 font-semibold">
+                    <i class="fa-solid fa-house mr-1.5"></i> Beranda
+                </button>
+                <button onclick="switchTab('materi')" id="nav-materi" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-book-open mr-1.5"></i> Materi Taktis
+                </button>
+                <button onclick="switchTab('video')" id="nav-video" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-video mr-1.5"></i> Lab Analisis Video
+                </button>
+                <button onclick="switchTab('simulasi')" id="nav-simulasi" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i> Simulasi Strategi
+                </button>
+                <button onclick="switchTab('tantangan')" id="nav-tantangan" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-trophy mr-1.5"></i> Tantangan Kuis
+                </button>
+                <button onclick="switchTab('evaluasi')" id="nav-evaluasi" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-pen-to-square mr-1.5"></i> Evaluasi Akhir
+                </button>
+                <button onclick="switchTab('refleksi')" id="nav-refleksi" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-comment-dots mr-1.5"></i> Refleksi
+                </button>
+                <button onclick="switchTab('guru')" id="nav-guru" class="nav-link px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition whitespace-nowrap">
+                    <i class="fa-solid fa-chart-line mr-1.5"></i> Dashboard Guru
+                </button>
+            </div>
+        </nav>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-nav" class="hidden md:hidden bg-slate-900 border-b border-slate-800 px-4 pt-2 pb-4 space-y-1">
+            <button onclick="switchTab('beranda'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-house w-6 text-gold-400"></i><span>Beranda</span></button>
+            <button onclick="switchTab('materi'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-book-open w-6 text-gold-400"></i><span>Materi Taktis</span></button>
+            <button onclick="switchTab('video'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-video w-6 text-gold-400"></i><span>Lab Analisis Video</span></button>
+            <button onclick="switchTab('simulasi'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-gamepad w-6 text-gold-400"></i><span>Simulasi Strategi</span></button>
+            <button onclick="switchTab('tantangan'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-trophy w-6 text-gold-400"></i><span>Tantangan Kuis</span></button>
+            <button onclick="switchTab('evaluasi'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-pen-to-square w-6 text-gold-400"></i><span>Evaluasi Akhir</span></button>
+            <button onclick="switchTab('refleksi'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-comment-dots w-6 text-gold-400"></i><span>Refleksi</span></button>
+            <button onclick="switchTab('guru'); toggleMobileNav();" class="w-full text-left px-3 py-2 rounded-md text-slate-200 hover:bg-slate-800 flex items-center space-x-2"><i class="fa-solid fa-chart-line w-6 text-gold-400"></i><span>Dashboard Guru</span></button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- MENU 1: BERANDA -->
+        <section id="section-beranda" class="tab-content space-y-8 animate-fadeIn">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-navy-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 md:p-12 shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-[200px] select-none pointer-events-none">🏸</div>
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-block px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold tracking-wide uppercase mb-4">
+                        <i class="fa-solid fa-certificate mr-1"></i> Media Interaktif Kurikulum Merdeka
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                        Analisis Strategi Penyerangan & Taktik Pertahanan Bulu Tangkis
+                    </h2>
+                    <p class="mt-4 text-slate-300 text-base md:text-lg leading-relaxed">
+                        Kuasai variasi serangan Smash, Drop Shot, Netting, serta rancang benteng pertahanan tangguh dalam permainan tunggal maupun ganda untuk meraih kemenangan taktis.
+                    </p>
+                    
+                    <!-- Teacher Info & Class Badge -->
+                    <div class="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-300">
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                            <i class="fa-solid fa-chalkboard-user text-gold-400 text-lg"></i>
+                            <span>Guru Pengampu: <strong class="text-white" id="teacher-name-display">Karniati, S.Pd.</strong></span>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700">
+                            <i class="fa-solid fa-graduation-cap text-emerald-400 text-lg"></i>
+                            <span>Kelas: <strong class="text-white">XII SMA / Fase F</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- CTA Action Button -->
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <button onclick="switchTab('materi')" class="px-8 py-4 rounded-2xl bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-400 hover:to-amber-500 text-slate-950 font-extrabold text-lg shadow-xl shadow-gold-500/25 transition transform hover:-translate-y-1 flex items-center space-x-3">
+                            <span>MULAI BELAJAR</span>
+                            <i class="fa-solid fa-circle-arrow-right text-xl"></i>
+                        </button>
+                        <button onclick="openSetupGuideModal()" class="px-6 py-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold border border-slate-700 transition flex items-center space-x-2">
+                            <i class="fa-solid fa-circle-info text-amber-400"></i>
+                            <span>Panduan Guru & Integrasi</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Objectives Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-2xl hover:border-gold-500/50 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-gold-400 mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-bullseye text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-2">1. Identifikasi Teknik</h3>
+                    <p class="text-sm text-slate-400">Mengidentifikasi karakteristik teknis Smash, Drop Shot, dan Netting secara detail.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl hover:border-emerald-500/50 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-2">2. Analisis Pertandingan</h3>
+                    <p class="text-sm text-slate-400">Menganalisis penggunaan variasi serangan dan kelemahan lawan melalui tayangan video.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl hover:border-blue-500/50 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-chess text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-2">3. Simulasi Taktis</h3>
+                    <p class="text-sm text-slate-400">Merancang strategi penyerangan dan pola bertahan tunggal maupun ganda.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl hover:border-purple-500/50 transition group">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-brain text-2xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-2">4. Critical Thinking</h3>
+                    <p class="text-sm text-slate-400">Menjelaskan rasional keputusan taktis dan menunjukkan sportivitas berolahraga.</p>
+                </div>
+            </div>
+
+            <!-- Student Identity Quick Entry -->
+            <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-id-card text-gold-400"></i>
+                    <span>Identitas Peserta Didik</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nama Lengkap</label>
+                        <input type="text" id="student-name" placeholder="Contoh: Budi Santoso" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Kelas</label>
+                        <select id="student-class" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500">
+                            <option value="XII MIPA 1">XII MIPA 1</option>
+                            <option value="XII MIPA 2">XII MIPA 2</option>
+                            <option value="XII IPS 1">XII IPS 1</option>
+                            <option value="XII IPS 2">XII IPS 2</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Nomor Absen</label>
+                        <input type="number" id="student-no" placeholder="Contoh: 12" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-gold-500">
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="saveStudentIdentity()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition flex items-center space-x-2">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Profil Belajar</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU 2: MATERI PEMBELAJARAN -->
+        <section id="section-materi" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Materi Strategi Penyerangan & Taktik Pertahanan</h2>
+                    <p class="text-slate-400 text-sm">Pelajari konsep analisis gerakan, variasi pukulan, dan posisi lapangan.</p>
+                </div>
+                <div class="flex space-x-2 bg-slate-900 p-1 rounded-xl border border-slate-800">
+                    <button onclick="filterMateri('all')" id="btn-materi-all" class="px-4 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-950">Semua</button>
+                    <button onclick="filterMateri('serang')" id="btn-materi-serang" class="px-4 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white">Strategi Serangan</button>
+                    <button onclick="filterMateri('tahan')" id="btn-materi-tahan" class="px-4 py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white">Taktik Pertahanan</button>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Smash Card -->
+                <div class="materi-item serang glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-gold-500/40 transition">
+                    <div class="p-5 bg-gradient-to-r from-red-950/80 to-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-red-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>1. Teknik Smash</span>
+                        </h3>
+                        <span class="text-xs font-extrabold px-2.5 py-1 bg-red-500/20 text-red-300 rounded-md">Serangan Tajam</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            <strong>Pengertian:</strong> Pukulan overhead yang menukik tajam dan kencang ke arah lapangan lawan.
+                        </p>
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="font-bold text-gold-400 mb-1">Variasi Smash:</div>
+                            <p>🔹 <strong>Smash Lurus:</strong> Mengarah sejajar garis pinggir lapangan untuk menekan reaksi lawan.</p>
+                            <p>🔹 <strong>Smash Silang (Cross-court):</strong> Memindahkan arah bola ke area kosong lawan secara mendadak.</p>
+                            <p>🔹 <strong>Jump Smash:</strong> Dikelakukan sambil melompat untuk menambah sudut kencang dan sudut ke bawah.</p>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                            <strong>Kapan Digunakan:</strong> Saat mendapat shuttlecock lambung tinggi di area tengah atau belakang lawan.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drop Shot Card -->
+                <div class="materi-item serang glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-gold-500/40 transition">
+                    <div class="p-5 bg-gradient-to-r from-amber-950/80 to-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-amber-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-feather"></i>
+                            <span>2. Teknik Drop Shot</span>
+                        </h3>
+                        <span class="text-xs font-extrabold px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-md">Serangan Kecohan</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            <strong>Pengertian:</strong> Pukulan seolah smash namun shuttlecock jatuh secara perlahan dekat jaring (net).
+                        </p>
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="font-bold text-gold-400 mb-1">Variasi Drop Shot:</div>
+                            <p>🔸 <strong>Slow Drop Shot:</strong> Shuttlecock meluncur halus menyusur net untuk memancing lawan maju.</p>
+                            <p>🔸 <strong>Fast Drop Shot:</strong> Menukik lebih cepat untuk mengejutkan lawan yang mati langkah.</p>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                            <strong>Fungsi Taktis:</strong> Mengubah tempo permainan dan menguras fisik lawan yang bertahan di belakang.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Netting Card -->
+                <div class="materi-item serang glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-gold-500/40 transition">
+                    <div class="p-5 bg-gradient-to-r from-emerald-950/80 to-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-emerald-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-grip-lines"></i>
+                            <span>3. Pukulan Netting</span>
+                        </h3>
+                        <span class="text-xs font-extrabold px-2.5 py-1 bg-emerald-500/20 text-emerald-300 rounded-md">Kontrol Depan</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            <strong>Pengertian:</strong> Pukulan pendek yang dilakukan di dekat net agar shuttlecock jatuh setipis mungkin di area lawan.
+                        </p>
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="font-bold text-gold-400 mb-1">Variasi Netting:</div>
+                            <p>🟢 <strong>Netting Tipis:</strong> Shuttlecock bergulir hampir menyentuh pita atas net.</p>
+                            <p>🟢 <strong>Netting Silang:</strong> Mengarahkan shuttlecock ke sudut net secara menyilang.</p>
+                        </div>
+                        <div class="text-xs text-slate-400 bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                            <strong>Tujuan Utama:</strong> Memaksa lawan melakukan *underhand lob* tinggi sehingga mudah di-smash.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Defense Singles Card -->
+                <div class="materi-item tahan glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500/40 transition">
+                    <div class="p-5 bg-gradient-to-r from-blue-950/80 to-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-blue-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>4. Pertahanan Tunggal</span>
+                        </h3>
+                        <span class="text-xs font-extrabold px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-md">Single Defense</span>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Fokus pada cakupan seluruh area lapangan oleh satu pemain dengan kembali ke *base position* (posisi tengah).
+                        </p>
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <p>🔹 Posisi raket selalu siap di depan dada.</p>
+                            <p>🔹 Mengembalikan smash keras ke area kosong yang jauh dari jangkauan lawan.</p>
+                            <p>🔹 Mengubah pertahanan pasif menjadi serangan balik lewat drive kencang.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Defense Doubles Card -->
+                <div class="materi-item tahan glass-card rounded-2xl overflow-hidden border border-slate-800 hover:border-purple-500/40 transition lg:col-span-2">
+                    <div class="p-5 bg-gradient-to-r from-purple-950/80 to-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-purple-400 flex items-center space-x-2">
+                            <i class="fa-solid fa-users"></i>
+                            <span>5. Taktik Pertahanan Permainan Ganda</span>
+                        </h3>
+                        <span class="text-xs font-extrabold px-2.5 py-1 bg-purple-500/20 text-purple-300 rounded-md">Pola Berdampingan vs Depan-Belakang</span>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="font-bold text-gold-400 mb-1">Pola Berdampingan (Side-by-Side):</div>
+                            <p>Digunakan saat <strong>BERTAHAN</strong> dari serangan smash lawan. Masing-masing pemain bertanggung jawab atas separuh lapangan kiri dan kanan.</p>
+                        </div>
+                        <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="font-bold text-gold-400 mb-1">Pola Depan-Belakang (Front-Back):</div>
+                            <p>Digunakan saat <strong>MENYERANG</strong>. Satu pemain menguasai area jaring/depan, sementara pemukul utama berada di area belakang.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- MENU 3: LABORATORIUM ANALISIS VIDEO -->
+        <section id="section-video" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Laboratorium Analisis Video Pertandingan</h2>
+                    <p class="text-slate-400 text-sm">Amatilah pola serangan dan taktik bertahan pemain dunia berikut ini.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Video Player Column -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="relative w-full rounded-2xl overflow-hidden bg-black border border-slate-800 shadow-2xl aspect-video">
+                        <iframe id="youtube-iframe" class="w-full h-full" src="https://www.youtube-nocookie.com/embed/5A4_I2e4X90?rel=0" title="BWF Badminton Match Analysis" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="glass-card p-4 rounded-xl text-xs text-slate-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-circle-info text-amber-400 mr-2"></i>Video dapat disesuaikan oleh Guru di Dashboard Settings.</span>
+                        <span class="text-gold-400 font-semibold">Video Resmi BWF</span>
+                    </div>
+                </div>
+
+                <!-- Analysis Form Column -->
+                <div class="lg:col-span-5 glass-card p-6 rounded-2xl space-y-4 border border-slate-800">
+                    <h3 class="font-bold text-lg text-white border-b border-slate-800 pb-3 flex items-center space-x-2">
+                        <i class="fa-solid fa-clipboard-check text-gold-400"></i>
+                        <span>Instrumen Pengamatan Taktis</span>
+                    </h3>
+
+                    <form id="video-analysis-form" onsubmit="handleVideoAnalysisSubmit(event)" class="space-y-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">1. Jenis Serangan Dominan Terlihat:</label>
+                            <select id="analysis-attack-type" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                                <option value="Smash Keras & Jump Smash">Smash Keras & Jump Smash</option>
+                                <option value="Variasi Drop Shot & Netting Tipis">Variasi Drop Shot & Netting Tipis</option>
+                                <option value="Kombinasi Drive Kencang & Smash">Kombinasi Drive Kencang & Smash</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">2. Mengapa Pemain Memilih Jenis Serangan Tersebut?</label>
+                            <textarea id="analysis-reason" rows="2" placeholder="Jelaskan kondisi posisi lawan saat serangan diluncurkan..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-gold-500" required></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">3. Identifikasi Area Kelemahan Lawan:</label>
+                            <input type="text" id="analysis-weakness" placeholder="Contoh: Pengembalian bola depan lambat / Sudut kiri belakang" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white" required>
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-slate-300 mb-1">4. Rekomendasi Taktik Pertahanan / Serangan Balik:</label>
+                            <textarea id="analysis-recommendation" rows="2" placeholder="Taktik pertahanan apa yang paling efektif untuk membalikkan posisi..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-gold-500" required></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-gold-500 to-amber-600 hover:from-gold-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>SIMPAN HASIL ANALISIS</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU 4: SIMULASI STRATEGI -->
+        <section id="section-simulasi" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800">
+                <h2 class="text-2xl font-extrabold text-white">Simulasi Lapangan & Pengambilan Keputusan Taktis</h2>
+                <p class="text-slate-400 text-sm">Pilihlah skenario permainan dan tentukan keputusan strategi yang tepat.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Visual Court Canvas / Diagram -->
+                <div class="lg:col-span-6 glass-card p-6 rounded-2xl border border-slate-800 text-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Papan Takitk Interactive Court</div>
+                    
+                    <!-- SVG Interactive Badminton Court -->
+                    <div class="relative w-full aspect-[4/3] court-bg rounded-xl border-4 border-slate-200 overflow-hidden shadow-2xl flex items-center justify-center">
+                        <svg viewBox="0 0 400 300" class="w-full h-full">
+                            <!-- Court Boundaries & Lines -->
+                            <rect x="20" y="20" width="360" height="260" fill="none" stroke="white" stroke-width="2"/>
+                            <!-- Net Line -->
+                            <line x1="200" y1="20" x2="200" y2="280" stroke="#f59e0b" stroke-width="4" stroke-dasharray="4,2"/>
+                            <!-- Service Lines -->
+                            <line x1="140" y1="20" x2="140" y2="280" stroke="white" stroke-width="1.5"/>
+                            <line x1="260" y1="20" x2="260" y2="280" stroke="white" stroke-width="1.5"/>
+                            <!-- Center Lines -->
+                            <line x1="20" y1="150" x2="140" y2="150" stroke="white" stroke-width="1.5"/>
+                            <line x1="260" y1="150" x2="380" y2="150" stroke="white" stroke-width="1.5"/>
+                            
+                            <!-- Player A (Opponent) Dynamic Marker -->
+                            <circle id="sim-opp-player1" cx="330" cy="150" r="14" fill="#ef4444" stroke="white" stroke-width="2"/>
+                            <text id="sim-opp-label" x="330" y="154" font-size="10" fill="white" font-weight="bold" text-anchor="middle">Lawan</text>
+
+                            <!-- Player B (User Player) Dynamic Marker -->
+                            <circle id="sim-user-player1" cx="80" cy="150" r="14" fill="#10b981" stroke="white" stroke-width="2"/>
+                            <text x="80" y="154" font-size="10" fill="white" font-weight="bold" text-anchor="middle">Anda</text>
+
+                            <!-- Shuttlecock Target Trajectory Arrow -->
+                            <path id="sim-arrow" d="M 95 150 Q 200 100 310 140" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="5,5" class="hidden"/>
+                        </svg>
+                    </div>
+                    <div id="sim-scenario-title" class="mt-4 font-bold text-amber-400 text-sm">Skenario 1: Lawan Bertahan Jauh di Belakang</div>
+                </div>
+
+                <!-- Scenario Selection & Interactive Questions -->
+                <div class="lg:col-span-6 glass-card p-6 rounded-2xl border border-slate-800 space-y-6">
+                    <!-- Scenario Selector -->
+                    <div class="flex space-x-2 overflow-x-auto pb-2">
+                        <button onclick="loadScenario(1)" id="btn-scen-1" class="px-3 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-950">Skenario 1</button>
+                        <button onclick="loadScenario(2)" id="btn-scen-2" class="px-3 py-2 text-xs font-bold rounded-lg bg-slate-800 text-slate-300">Skenario 2</button>
+                        <button onclick="loadScenario(3)" id="btn-scen-3" class="px-3 py-2 text-xs font-bold rounded-lg bg-slate-800 text-slate-300">Skenario 3</button>
+                        <button onclick="loadScenario(4)" id="btn-scen-4" class="px-3 py-2 text-xs font-bold rounded-lg bg-slate-800 text-slate-300">Skenario 4</button>
+                    </div>
+
+                    <!-- Scenario Description -->
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 text-xs leading-relaxed space-y-2">
+                        <div class="font-bold text-white text-sm" id="scen-desc-title">Situasi Pertandingan:</div>
+                        <p id="scen-desc-text" class="text-slate-300">Lawan mengembalikan bola dengan lob melambung tinggi, lalu dengan cepat mundur terlalu jauh hingga menempel garis belakang lapangan.</p>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="space-y-3" id="scen-options-container">
+                        <!-- Options generated dynamically via JS -->
+                    </div>
+
+                    <!-- Feedback Output -->
+                    <div id="scen-feedback" class="hidden p-4 rounded-xl text-xs leading-relaxed font-medium"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU 5: TANTANGAN ANALISIS (GAMIFIKASI) -->
+        <section id="section-tantangan" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Tantangan Kuis Taktis</h2>
+                    <p class="text-slate-400 text-sm">Kumpulkan Skor XP dan Dapatkan Badge Ahli Strategi Bulu Tangkis!</p>
+                </div>
+                <!-- XP & Badge Tracker -->
+                <div class="flex items-center space-x-4 bg-slate-900 px-4 py-2 rounded-2xl border border-slate-800">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-star text-gold-400 text-lg"></i>
+                        <span class="text-xs font-bold text-slate-300">XP: <strong id="user-xp" class="text-gold-400 text-sm">0</strong></span>
+                    </div>
+                    <div class="h-4 w-px bg-slate-800"></div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-award text-emerald-400 text-lg"></i>
+                        <span id="user-badge" class="text-xs font-extrabold text-emerald-400">Pemula Taktis</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Card -->
+            <div class="max-w-3xl mx-auto glass-card p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden">
+                <div id="quiz-container">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-400 mb-4">
+                        <span id="quiz-number">Pertanyaan 1 dari 5</span>
+                        <span id="quiz-category" class="text-amber-400">Analisis Kasus</span>
+                    </div>
+
+                    <h3 id="quiz-question" class="text-lg md:text-xl font-extrabold text-white mb-6 leading-snug">
+                        <!-- Question Text Inserted Here -->
+                    </h3>
+
+                    <div id="quiz-options" class="space-y-3">
+                        <!-- Options Inserted Here -->
+                    </div>
+
+                    <div id="quiz-explanation" class="hidden mt-6 p-4 rounded-xl text-xs leading-relaxed border"></div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-sm transition">
+                            Pertanyaan Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU 6: EVALUASI AKHIR (20 SOAL) -->
+        <section id="section-evaluasi" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Evaluasi Hasil Belajar Siswa</h2>
+                    <p class="text-slate-400 text-sm">Uji pemahaman komprehensif 20 Soal HOTS (Nilai Maksimal 100).</p>
+                </div>
+                <div class="bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 text-xs font-bold text-slate-300">
+                    Waktu Pengerjaan: <span id="eval-timer" class="text-gold-400">30:00</span>
+                </div>
+            </div>
+
+            <!-- Evaluation Wrapper -->
+            <div id="eval-intro-card" class="glass-card p-8 rounded-3xl border border-slate-800 text-center max-w-2xl mx-auto space-y-6">
+                <div class="w-16 h-16 bg-amber-500/10 text-gold-400 rounded-2xl flex items-center justify-center text-3xl mx-auto">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-white">Siap Memulai Evaluasi Akhir?</h3>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    Evaluasi ini terdiri dari 20 soal pilihan ganda. Nilai akhir Anda akan dihitung secara otomatis dan dapat langsung disinkronkan ke Google Spreadsheet guru.
+                </p>
+                <button onclick="startFinalEvaluation()" class="px-8 py-4 bg-gradient-to-r from-gold-500 to-amber-600 text-slate-950 font-extrabold text-base rounded-2xl shadow-xl hover:scale-105 transition">
+                    MULAI KERJAKAN EVALUASI (20 SOAL)
+                </button>
+            </div>
+
+            <!-- Quiz Questions Form -->
+            <div id="eval-questions-container" class="hidden space-y-8 max-w-4xl mx-auto">
+                <!-- 20 Questions rendered dynamically -->
+            </div>
+
+            <div id="eval-submit-wrapper" class="hidden max-w-4xl mx-auto flex justify-end">
+                <button onclick="submitFinalEvaluation()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-lg rounded-2xl shadow-xl transition flex items-center space-x-3">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>KIRIM JAWABAN EVALUASI</span>
+                </button>
+            </div>
+
+            <!-- Evaluation Score Certificate Card -->
+            <div id="eval-result-card" class="hidden glass-card p-8 rounded-3xl border border-slate-800 max-w-3xl mx-auto text-center space-y-6">
+                <div class="text-gold-400 text-5xl">🏆</div>
+                <h3 class="text-2xl font-extrabold text-white">Hasil Evaluasi Pembelajaran</h3>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400">Skor Akhir</div>
+                        <div id="res-score" class="text-3xl font-extrabold text-gold-400">0</div>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400">Benar / Total</div>
+                        <div id="res-correct" class="text-2xl font-extrabold text-emerald-400">0 / 20</div>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400">Status</div>
+                        <div id="res-status" class="text-sm font-extrabold text-amber-400 mt-2">TUNTAS</div>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400">Waktu Pengerjaan</div>
+                        <div id="res-time" class="text-sm font-bold text-white mt-2">00:00</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4 pt-4 no-print">
+                    <button onclick="window.print()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-sm border border-slate-700">
+                        <i class="fa-solid fa-print mr-2"></i>Cetak Hasil
+                    </button>
+                    <button onclick="resetEvaluation()" class="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm">
+                        <i class="fa-solid fa-rotate-right mr-2"></i>Ulangi Evaluasi
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU 7: REFLEKSI PESERTA DIDIK -->
+        <section id="section-refleksi" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800">
+                <h2 class="text-2xl font-extrabold text-white">Refleksi Pembelajaran Siswa</h2>
+                <p class="text-slate-400 text-sm">Ungkapkan pemahaman dan pengalaman belajar Anda secara jujur.</p>
+            </div>
+
+            <form onsubmit="handleReflectionSubmit(event)" class="max-w-3xl mx-auto glass-card p-6 md:p-8 rounded-3xl border border-slate-800 space-y-6">
+                <div>
+                    <label class="block font-bold text-sm text-slate-200 mb-2">1. Apa pengetahuan atau wawasan baru paling berharga yang kamu peroleh hari ini?</label>
+                    <textarea id="refl-q1" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-gold-500" required></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-sm text-slate-200 mb-2">2. Variasi strategi serangan mana yang paling kamu pahami dan kuasai?</label>
+                    <textarea id="refl-q2" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-gold-500" required></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-sm text-slate-200 mb-2">3. Apa kesulitan utama yang kamu hadapi saat menentukan taktik pertahanan ganda?</label>
+                    <textarea id="refl-q3" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-gold-500" required></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-sm text-slate-200 mb-2">4. Bagaimana kamu akan menerapkan strategi permainan ini dalam situasi pertandingan nyata di lapangan?</label>
+                    <textarea id="refl-q4" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-gold-500" required></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold rounded-2xl transition flex items-center justify-center space-x-2 shadow-xl">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>KIRIM HASIL REFLEKSI BELAJAR</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- MENU 8: DASHBOARD GURU -->
+        <section id="section-guru" class="tab-content hidden space-y-8 animate-fadeIn">
+            <div class="pb-4 border-b border-slate-800 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-white">Dashboard Monitoring Guru</h2>
+                    <p class="text-slate-400 text-sm">Rekapitulasi nilai, statistik ketuntasan kelas, dan integrasi Google Workspace.</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="openAppsScriptCodeModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center space-x-2">
+                        <i class="fa-solid fa-code"></i>
+                        <span>Kode Google Apps Script (Code.gs)</span>
+                    </button>
+                    <button onclick="openSetupGuideModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition flex items-center space-x-2">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Pengaturan Web App URL</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                    <div class="text-xs text-slate-400 font-semibold">Total Siswa Terdata</div>
+                    <div id="dash-total-students" class="text-3xl font-extrabold text-white mt-2">1</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                    <div class="text-xs text-slate-400 font-semibold">Rata-Rata Kelas</div>
+                    <div id="dash-avg-score" class="text-3xl font-extrabold text-gold-400 mt-2">85.0</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                    <div class="text-xs text-slate-400 font-semibold">Persentase Ketuntasan</div>
+                    <div id="dash-completion-rate" class="text-3xl font-extrabold text-emerald-400 mt-2">100%</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-slate-800">
+                    <div class="text-xs text-slate-400 font-semibold">Status Sync Google Sheets</div>
+                    <div id="dash-sync-status" class="text-xs font-bold text-amber-400 mt-3">Menunggu Konfigurasi Web App</div>
+                </div>
+            </div>
+
+            <!-- Teacher Control Action Links -->
+            <div class="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
+                <h3 class="font-bold text-white text-sm">Akses Cepat Dokumen Google Workspace</h3>
+                <div class="flex flex-wrap gap-4">
+                    <a id="link-google-sheet" href="#" target="_blank" class="px-5 py-3 bg-emerald-700/80 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center space-x-2 border border-emerald-500/30">
+                        <i class="fa-solid fa-file-excel text-base"></i>
+                        <span>Buka Google Spreadsheet Nilai</span>
+                    </a>
+                    <a id="link-google-doc" href="#" target="_blank" class="px-5 py-3 bg-blue-700/80 hover:bg-blue-600 text-white text-xs font-bold rounded-xl flex items-center space-x-2 border border-blue-500/30">
+                        <i class="fa-solid fa-file-word text-base"></i>
+                        <span>Buka Dokumen Laporan Google Docs</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Student Score Recap Table -->
+            <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+                <div class="p-5 border-b border-slate-800 font-bold text-white text-sm flex justify-between items-center">
+                    <span>Rekapitulasi Hasil Belajar Peserta Didik</span>
+                    <button onclick="clearLocalStudentData()" class="text-xs text-red-400 hover:text-red-300">Hapus Data Lokal</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-bold border-b border-slate-800">
+                            <tr>
+                                <th class="p-4">Nama Siswa</th>
+                                <th class="p-4">Kelas</th>
+                                <th class="p-4">Skor Evaluasi</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4">Analisis Video</th>
+                                <th class="p-4">Refleksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-recap-table-body" class="divide-y divide-slate-800">
+                            <!-- Recaps rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-6 text-center text-xs text-slate-500 no-print">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>© 2026 BADMINTON SMART LEARNING - PJOK KELAS XII SMA</p>
+            <p class="mt-1">Dirancang oleh Guru PJOK: <strong class="text-slate-400">Karniati, S.Pd.</strong> | Kurikulum Merdeka</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: GOOGLE APPS SCRIPT CODE & SETUP INSTRUCTIONS -->
+    <div id="modal-appsscript" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 rounded-3xl border border-slate-700 space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-code text-indigo-400"></i>
+                    <span>Kode Google Apps Script (`Code.gs`)</span>
+                </h3>
+                <button onclick="closeModal('modal-appsscript')" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <p class="text-xs text-slate-300">
+                Salin seluruh kode di bawah ini ke dalam <strong>Google Apps Script (Code.gs)</strong> di Google Spreadsheet Anda untuk mengaktifkan penyimpanan data otomatis.
+            </p>
+
+            <div class="relative bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 overflow-x-auto">
+                <button onclick="copyAppsScriptCode()" class="absolute top-3 right-3 px-3 py-1 bg-indigo-600 text-white rounded text-xs font-sans">Salin Kode</button>
+                <pre id="appsscript-code-text">
+function doPost(e) {
+  try {
+    var contents = JSON.parse(e.postData.contents);
+    var action = contents.action;
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (action === "saveEvaluation") {
+      var sheet = getOrCreateSheet(ss, "HASIL EVALUASI");
+      sheet.appendRow([
+        new Date(),
+        contents.nama,
+        contents.kelas,
+        contents.skor,
+        contents.benar,
+        contents.waktu,
+        contents.status
+      ]);
+    } else if (action === "saveAnalysis") {
+      var sheet = getOrCreateSheet(ss, "ANALISIS VIDEO");
+      sheet.appendRow([
+        new Date(),
+        contents.nama,
+        contents.kelas,
+        contents.jenisSerangan,
+        contents.alasan,
+        contents.kelemahan,
+        contents.rekomendasi
+      ]);
+    } else if (action === "saveReflection") {
+      var sheet = getOrCreateSheet(ss, "REFLEKSI");
+      sheet.appendRow([
+        new Date(),
+        contents.nama,
+        contents.kelas,
+        contents.q1,
+        contents.q2,
+        contents.q3,
+        contents.q4
+      ]);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({result: "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({result: "error", error: err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getOrCreateSheet(ss, name) {
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+  }
+  return sheet;
+}
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SETUP GUIDE & URL CONFIG -->
+    <div id="modal-setup" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-2xl w-full p-6 rounded-3xl border border-slate-700 space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-gear text-amber-400"></i>
+                    <span>Konfigurasi Google Integration</span>
+                </h3>
+                <button onclick="closeModal('modal-setup')" class="text-slate-400 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-200 mb-1">Google Apps Script Web App URL:</label>
+                    <input type="url" id="cfg-webapp-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-200 mb-1">URL Google Spreadsheet Rekap Nilai:</label>
+                    <input type="url" id="cfg-sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-200 mb-1">URL Google Docs Dokumen Laporan:</label>
+                    <input type="url" id="cfg-doc-url" placeholder="https://docs.google.com/document/d/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white">
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button onclick="saveConfigurations()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs">
+                    Simpan Konfigurasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // App State
+        let currentTab = 'beranda';
+        let webAppUrl = localStorage.getItem('pjok_webapp_url') || '';
+        let spreadsheetUrl = localStorage.getItem('pjok_sheet_url') || '#';
+        let docUrl = localStorage.getItem('pjok_doc_url') || '#';
+
+        let studentData = JSON.parse(localStorage.getItem('pjok_student_identity')) || {
+            nama: 'Siswa XII',
+            kelas: 'XII MIPA 1',
+            noAbsen: '1'
+        };
+
+        let xpPoints = parseInt(localStorage.getItem('pjok_xp')) || 0;
+        let currentQuizIndex = 0;
+
+        // 20 Questions Data Bank
+        const evaluationQuestions = [
+            // 5 Questions: Smash Variations
+            { q: "Smash lurus dilakukan dengan mengarahkan shuttlecock sejajar dengan garis pinggir lapangan. Tujuan utama dari penggunaan smash lurus adalah...", options: ["A. Memberikan waktu bagi pemain untuk kembali ke tengah", "B. Memaksa lawan melakukan pengembalian lemah di area pinggir", "C. Memancing lawan maju mendekati jaring", "D. Mengurangi kecepatan laju shuttlecock"], answer: 1, explanation: "Smash lurus menekan reaksi lawan di area pinggir lapangan secara cepat." },
+            { q: "Perbedaan utama antara smash biasa dengan Jump Smash dalam permainan bulu tangkis adalah...", options: ["A. Jump smash hanya dilakukan dalam permainan ganda", "B. Jump smash menghasilkan sudut pukulan yang lebih menukik dan tajam", "C. Jump smash membutuhkan kekuatan pegangan raket yang lebih lentur", "D. Jump smash tidak menguras energi pemain"], answer: 1, explanation: "Lompatan menambah ketinggian kontak bola sehingga sudut tajam menukik." },
+            { q: "Seorang pemain melakukan smash silang (cross-court smash) ketika posisi lawan berada di...", options: ["A. Tengah lapangan", "B. Depan jaring", "C. Sudut lapangan yang sama dengan arah pukulan", "D. Sudut lapangan yang berlawanan dari posisi pemukul"], answer: 3, explanation: "Smash silang mengeksploitasi area kosong di sisi berlawanan lawan." },
+            { q: "Faktor risiko paling tinggi saat pemain terlalu sering menggunakan serangan smash bertubi-tubi adalah...", options: ["A. Poin lawan berkurang otomatis", "B. Fisik pemain cepat terkuras dan posisi bertahan menjadi terbuka", "C. Raket cepat patah", "D. Shuttlecock menjadi lambat"], answer: 1, explanation: "Smash memerlukan daya ledak otot tinggi yang menguras stamina." },
+            { q: "Kapan momen paling tepat untuk meluncurkan smash keras?", options: ["A. Saat lawan memberikan bola lob melambung tinggi di tengah lapangan", "B. Saat shuttlecock masih berada di bawah pita net", "C. Saat lawan berada sangat dekat dengan net", "D. Saat melakukan servis pertama"], answer: 0, explanation: "Bola lob tinggi memberikan waktu dan sudut smash ideal." },
+
+            // 5 Questions: Drop Shot & Netting
+            { q: "Pukulan drop shot yang dilakukan secara halus sehingga shuttlecock jatuh sangat dekat di belakang net lawan disebut...", options: ["A. Fast drop shot", "B. Slow drop shot", "C. Jump drop shot", "D. Drive drop"], answer: 1, explanation: "Slow drop shot mengutamakan kehalusan agar jatuh dekat pita net." },
+            { q: "Fungsi taktis utama variasi Fast Drop Shot dalam pertandingan adalah...", options: ["A. Mengulur waktu pertandingan", "B. Mengejutkan lawan yang terlanjur bergerak mundur dengan menukik cepat", "C. Memberikan poin langsung tanpa perlu bergerak", "D. Melatih kelenturan pergelangan tangan"], answer: 1, explanation: "Fast drop shot menukik lebih kencang mematikan langkah lawan." },
+            { q: "Ciri khas utama pukulan netting yang berkualitas tinggi adalah...", options: ["A. Shuttlecock melambung tinggi di atas net", "B. Shuttlecock meluncur kencang ke garis belakang", "C. Shuttlecock melintasi net tipis dan langsung menukik jatuh", "D. Shuttlecock dipukul menggunakan pergelangan kaki"], answer: 2, explanation: "Netting tipis membatasi opsi pengembalian lawan." },
+            { q: "Tujuan taktis memancing lawan maju ke depan jaring menggunakan tipuan netting adalah...", options: ["A. Agar lawan lelah melompat", "B. Membuka area belakang lawan untuk diserang dengan lob melambung", "C. Menghentikan pertandingan sementara", "D. Memenuhi syarat aturan BWF"], answer: 1, explanation: "Memancing lawan maju meninggalkan ruang kosong di belakang." },
+            { q: "Penggunaan variasi drop shot sangat efektif dilakukan apabila lawan memiliki karakteristik...", options: ["A. Bertahan di dekat net", "B. Sangat lambat saat bergerak dari belakang ke depan lapangan", "C. Memiliki pukulan smash yang sangat keras", "D. Bermain dengan tenang"], answer: 1, explanation: "Lawan yang lambat maju akan kesulitan menjangkau drop shot." },
+
+            // 5 Questions: Attack Strategies
+            { q: "Dalam permainan tunggal, variasi serangan kombinasi yang paling mematikan untuk menguras stamina lawan adalah...", options: ["A. Servis pendek terus menerus", "B. Kombinasi Lob Dalam -> Drop Shot Tipis -> Smash Keras", "C. Netting berturut-turut tanpa henti", "D. Drive lurus tanpa variasi"], answer: 1, explanation: "Kombinasi menuntut lawan berlari dari sudut belakang ke depan." },
+            { q: "Jika pasangan ganda lawan memiliki pertahanan yang sangat kokoh terhadap smash, strategi penyerangan pengganti yang tepat adalah...", options: ["A. Menyerah dan bertahan saja", "B. Mengubah serangan dengan variasi drop shot dan netting tipis", "C. Melakukan smash dari garis servis depan", "D. Mengarahkan bola melambung tinggi keluar lapangan"], answer: 1, explanation: "Variasi memecah ritme dan kerapatan pertahanan kokoh." },
+            { q: "Mengapa pemain ganda saat menyerang menggunakan pola posisi depan-belakang (Front-Back)?", options: ["A. Agar salah satu pemain bisa beristirahat", "B. Pemain depan mengunci bola net dan pemain belakang mengeksekusi smash", "C. Sesuai aturan wajib BWF", "D. Memudahkan koordinasi mata"], answer: 1, explanation: "Pola front-back memberikan tekanan smash terus menerus." },
+            { q: "Memanfaatkan kelemahan koordinasi komunikasi pasangan ganda lawan dilakukan dengan cara mengarahkan serangan ke...", options: ["A. Garis luar sebelah kanan", "B. Area tengah di antara kedua pemain lawan", "C. Tangan dominan lawan", "D. Luar lapangan"], answer: 1, explanation: "Bola tengah menciptakan keraguan siapa yang mengambil bola." },
+            { q: "Strategi menaikkan tempo permainan dengan drive kencang bertujuan untuk...", options: ["A. Memberikan lawan waktu berfikir", "B. Memaksa lawan melakukan kesalahan sendiri (unforced error) karena terdesak", "C. Meredam emosi penonton", "D. Menghemat energi"], answer: 1, explanation: "Tempo cepat menekan refleks lawan hingga salah mengembalikan." },
+
+            // 5 Questions: Defense Tactics
+            { q: "Saat pasangan ganda digempur dengan smash keras beruntun oleh lawan, posisi bertahan yang paling ideal adalah...", options: ["A. Depan - Belakang", "B. Berdampingan (Side-by-Side)", "C. Berdiri di satu sudut bersamaan", "D. Bebas tanpa aturan"], answer: 1, explanation: "Side-by-side membagi lapangan kiri-kanan untuk menutup area smash." },
+            { q: "Taktik mengembalikan smash keras lawan dengan dorongan pelan ke area jaring yang kosong dinamakan...", options: ["A. Block / Defense Netting", "B. Clear Lob", "C. Drive Kencang", "D. Backhand Smash"], answer: 0, explanation: "Block menyerap tenaga smash dan meredam bola jatuh di dekat net." },
+            { q: "Bagaimana cara mengubah situasi terdesak dalam pertahanan menjadi peluang serangan balik?", options: ["A. Mengembalikan bola selalu melambung tinggi", "B. Melakukan drive potong kencang mengarah ke badan lawan yang maju", "C. Membiarkan bola jatuh", "D. Membuang raket"], answer: 1, explanation: "Drive potong menghentikan dominasi serangan overhead lawan." },
+            { q: "Dalam permainan tunggal, posisi 'Base Position' (titik pusat kembali) berada di...", options: ["A. Pojok kanan belakang", "B. Sangat dekat dengan net", "C. Tengah-tengah area lapangan sendiri", "D. Luar garis batas"], answer: 2, explanation: "Base position memberikan jangkauan seimbang ke seluruh sudut." },
+            { q: "Tindakan taktis yang tepat ketika lawan melakukan smash silang yang sangat tajam adalah...", options: ["A. Mengembalikan lurus menyusur net untuk membuka area kosong lawan", "B. Memukul bola setinggi mungkin keluar", "C. Diam mematung", "D. Berlari ke arah raket lawan"], answer: 0, explanation: "Pengembalian lurus menyusur net memanfaatkan posisi lawan yang terlanjur miring." }
+        ];
+
+        window.onload = function() {
+            loadStoredData();
+            initQuizGamification();
+            renderEvaluations();
+            updateOverallProgress();
+        };
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-slate-800', 'text-amber-400', 'font-semibold');
+                el.classList.add('text-slate-400');
+            });
+
+            const targetSection = document.getElementById('section-' + tabId);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            const targetNav = document.getElementById('nav-' + tabId);
+            if (targetNav) {
+                targetNav.classList.add('bg-slate-800', 'text-amber-400', 'font-semibold');
+                targetNav.classList.remove('text-slate-400');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateOverallProgress();
+        }
+
+        function toggleMobileNav() {
+            const nav = document.getElementById('mobile-nav');
+            nav.classList.toggle('hidden');
+        }
+
+        function loadStoredData() {
+            document.getElementById('student-name').value = studentData.nama || '';
+            document.getElementById('student-class').value = studentData.kelas || 'XII MIPA 1';
+            document.getElementById('student-no').value = studentData.noAbsen || '1';
+
+            if (webAppUrl) document.getElementById('cfg-webapp-url').value = webAppUrl;
+            if (spreadsheetUrl) {
+                document.getElementById('cfg-sheet-url').value = spreadsheetUrl;
+                document.getElementById('link-google-sheet').href = spreadsheetUrl;
+            }
+            if (docUrl) {
+                document.getElementById('cfg-doc-url').value = docUrl;
+                document.getElementById('link-google-doc').href = docUrl;
+            }
+
+            renderStudentRecapTable();
+        }
+
+        function saveStudentIdentity() {
+            studentData.nama = document.getElementById('student-name').value || 'Siswa XII';
+            studentData.kelas = document.getElementById('student-class').value || 'XII MIPA 1';
+            studentData.noAbsen = document.getElementById('student-no').value || '1';
+
+            localStorage.setItem('pjok_student_identity', JSON.stringify(studentData));
+            alert('Profil siswa berhasil disimpan!');
+            renderStudentRecapTable();
+        }
+
+        const scenarios = {
+            1: {
+                title: "Skenario 1: Lawan Bertahan Jauh di Belakang",
+                desc: "Lawan baru saja mengembalikan bola dengan lob tinggi, lalu mengambil posisi bertahan terlalu jauh di sudut belakang lapangan.",
+                options: [
+                    { text: "Lakukan Drop Shot Tipis menyusur net", correct: true, feedback: "TEPAT! Drop shot akan memaksa lawan berlari jauh ke depan dan mati langkah." },
+                    { text: "Lakukan Smash keras tepat ke arah dada lawan", correct: false, feedback: "KURANG TEPAT. Lawan di belakang memiliki waktu cukup untuk siap membendung smash." },
+                    { text: "Kembalikan dengan Pukulan Lob tinggi lagi", correct: false, feedback: "KURANG TEPAT. Lob tinggi hanya memberi kesempatan lawan untuk membalikkan serangan." }
+                ]
+            },
+            2: {
+                title: "Skenario 2: Lawan Memiliki Lambat Antisipasi Bola Depan",
+                desc: "Hasil analisis mengindikasikan lawan memiliki keterbatasan refleks saat menjangkau bola-bola potong di depan net.",
+                options: [
+                    { text: "Gunakan kombinasi Netting Tipis diselingi Fast Drop Shot", correct: true, feedback: "SANGAT TEPAT! Memanfaatkan kelemahan pergerakan depan lawan untuk memanen poin." },
+                    { text: "Mainkan bola-bola drive kencang di garis belakang", correct: false, feedback: "KURANG TEPAT. Bola belakang merupakan area kekuatan lawan." }
+                ]
+            },
+            3: {
+                title: "Skenario 3: Bertahan dari Smash Keras Bertubi-tubi",
+                desc: "Lawan meluncurkan Jump Smash kencang secara berturut-turut dari area tengah belakang.",
+                options: [
+                    { text: "Bentuk posisi Side-by-Side dan lakukan Block Soft Return ke net", correct: true, feedback: "LUAR BIASA! Block meredam kecepatan smash dan mematikan tempo serangan lawan." },
+                    { text: "Maju kedua-duanya ke depan net secara bersamaan", correct: false, feedback: "BERBAHAYA! Meninggalkan seluruh area belakang tanpa penjagaan." }
+                ]
+            },
+            4: {
+                title: "Skenario 4: Ganda Lawan Berdiri Sejajar Saat Menyerang",
+                desc: "Dua pemain lawan berdiri sejajar di kiri dan kanan saat mengembalikan bola melambung.",
+                options: [
+                    { text: "Arahkan Smash Keras tepat ke garis Tengah di antara kedua pemain", correct: true, feedback: "CERDAS! Bola tengah menciptakan keraguan dan bentrokan raket antar pemain ganda." },
+                    { text: "Kembalikan bola ke arah luar lapangan", correct: false, feedback: "SALAH. Bola keluar memberikan poin gratis bagi lawan." }
+                ]
+            }
+        };
+
+        function loadScenario(scenId) {
+            const s = scenarios[scenId];
+            document.getElementById('sim-scenario-title').innerText = s.title;
+            document.getElementById('scen-desc-text').innerText = s.desc;
+
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`btn-scen-${i}`);
+                if (i === scenId) {
+                    btn.className = "px-3 py-2 text-xs font-bold rounded-lg bg-amber-500 text-slate-950";
+                } else {
+                    btn.className = "px-3 py-2 text-xs font-bold rounded-lg bg-slate-800 text-slate-300";
+                }
+            }
+
+            const optContainer = document.getElementById('scen-options-container');
+            optContainer.innerHTML = '';
+
+            s.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-gold-500 text-xs text-slate-200 transition";
+                btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt.text}`;
+                btn.onclick = () => {
+                    const fb = document.getElementById('scen-feedback');
+                    fb.classList.remove('hidden', 'bg-emerald-900/50', 'text-emerald-300', 'bg-red-900/50', 'text-red-300');
+                    if (opt.correct) {
+                        fb.classList.add('bg-emerald-900/50', 'text-emerald-300', 'border', 'border-emerald-500/40');
+                        fb.innerText = opt.feedback;
+                        document.getElementById('sim-arrow').classList.remove('hidden');
+                    } else {
+                        fb.classList.add('bg-red-900/50', 'text-red-300', 'border', 'border-red-500/40');
+                        fb.innerText = opt.feedback;
+                    }
+                };
+                optContainer.appendChild(btn);
+            });
+
+            document.getElementById('scen-feedback').classList.add('hidden');
+        }
+
+        const gamifiedQuizzes = [
+            {
+                q: "Ketika lawan berada dalam posisi bertahan sangat rapat di pinggir kanan, pilihan arah serangan terbaik adalah...",
+                opts: ["Smash silang ke sudut kiri kosong", "Lurus ke raket lawan", "Lob tinggi ke tengah"],
+                ans: 0,
+                exp: "Pukulan menyilang memanfaatkan sudut lapangan lawan yang paling terbuka."
+            },
+            {
+                q: "Pola pertahanan Side-by-Side sangat efektif membendung serangan...",
+                opts: ["Netting tipis", "Smash keras bertubi-tubi", "Slow drop shot"],
+                ans: 1,
+                exp: "Side-by-side membagi coverage area kiri dan kanan secara sejajar."
+            }
+        ];
+
+        function initQuizGamification() {
+            document.getElementById('user-xp').innerText = xpPoints;
+            updateBadgeTitle();
+            renderQuizQuestion();
+        }
+
+        function updateBadgeTitle() {
+            const badgeEl = document.getElementById('user-badge');
+            if (xpPoints >= 100) badgeEl.innerText = "Master Taktis Bulu Tangkis 🏆";
+            else if (xpPoints >= 50) badgeEl.innerText = "Analis Taktis Utama ⭐";
+            else badgeEl.innerText = "Pemula Taktis 🏸";
+        }
+
+        function renderQuizQuestion() {
+            if (currentQuizIndex >= gamifiedQuizzes.length) {
+                document.getElementById('quiz-container').innerHTML = `
+                    <div class="text-center py-8 space-y-4">
+                        <div class="text-5xl">🎉</div>
+                        <h3 class="text-2xl font-extrabold text-white">Selamat! Anda Menyelesaikan Kuis Tantangan</h3>
+                        <p class="text-sm text-slate-300">Total XP Terkumpul: <strong class="text-gold-400">${xpPoints} XP</strong></p>
+                    </div>
+                `;
+                return;
+            }
+
+            const q = gamifiedQuizzes[currentQuizIndex];
+            document.getElementById('quiz-number').innerText = `Pertanyaan ${currentQuizIndex + 1} dari ${gamifiedQuizzes.length}`;
+            document.getElementById('quiz-question').innerText = q.q;
+
+            const optsBox = document.getElementById('quiz-options');
+            optsBox.innerHTML = '';
+
+            q.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-gold-500 text-sm text-white transition";
+                btn.innerText = opt;
+                btn.onclick = () => checkQuizAnswer(idx);
+                optsBox.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(idx) {
+            const q = gamifiedQuizzes[currentQuizIndex];
+            const exp = document.getElementById('quiz-explanation');
+            exp.classList.remove('hidden');
+
+            if (idx === q.ans) {
+                exp.className = "mt-6 p-4 rounded-xl text-xs bg-emerald-900/40 border border-emerald-500 text-emerald-300";
+                exp.innerText = "BENAR! " + q.exp;
+                xpPoints += 25;
+                localStorage.setItem('pjok_xp', xpPoints);
+                document.getElementById('user-xp').innerText = xpPoints;
+                updateBadgeTitle();
+            } else {
+                exp.className = "mt-6 p-4 rounded-xl text-xs bg-red-900/40 border border-red-500 text-red-300";
+                exp.innerText = "SALAH. " + q.exp;
+            }
+
+            document.getElementById('quiz-next-btn').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            document.getElementById('quiz-explanation').classList.add('hidden');
+            document.getElementById('quiz-next-btn').classList.add('hidden');
+            renderQuizQuestion();
+        }
+
+        function renderEvaluations() {
+            const container = document.getElementById('eval-questions-container');
+            container.innerHTML = '';
+
+            evaluationQuestions.forEach((item, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = "glass-card p-6 rounded-2xl border border-slate-800 space-y-4";
+                qCard.innerHTML = `
+                    <div class="font-bold text-sm text-amber-400">Soal ${idx + 1} dari 20</div>
+                    <p class="text-sm font-semibold text-white leading-relaxed">${item.q}</p>
+                    <div class="space-y-2">
+                        ${item.options.map((opt, oIdx) => `
+                            <label class="flex items-center space-x-3 p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 cursor-pointer text-xs text-slate-300">
+                                <input type="radio" name="eval_q_${idx}" value="${oIdx}" class="text-gold-500 focus:ring-0">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(qCard);
+            });
+        }
+
+        function startFinalEvaluation() {
+            document.getElementById('eval-intro-card').classList.add('hidden');
+            document.getElementById('eval-questions-container').classList.remove('hidden');
+            document.getElementById('eval-submit-wrapper').classList.remove('hidden');
+        }
+
+        function submitFinalEvaluation() {
+            let correctCount = 0;
+            evaluationQuestions.forEach((item, idx) => {
+                const selected = document.querySelector(`input[name="eval_q_${idx}"]:checked`);
+                if (selected && parseInt(selected.value) === item.answer) {
+                    correctCount++;
+                }
+            });
+
+            const score = (correctCount / 20) * 100;
+            const status = score >= 75 ? "TUNTAS (LULUS)" : "BELUM TUNTAS";
+
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-correct').innerText = `${correctCount} / 20`;
+            document.getElementById('res-status').innerText = status;
+            document.getElementById('res-time').innerText = "12:45";
+
+            document.getElementById('eval-questions-container').classList.add('hidden');
+            document.getElementById('eval-submit-wrapper').classList.add('hidden');
+            document.getElementById('eval-result-card').classList.remove('hidden');
+
+            // Save to Local Data Recap
+            saveLocalEvalRecap(score, correctCount, status);
+
+            // Cloud Sync via Apps Script
+            if (webAppUrl) {
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveEvaluation',
+                        nama: studentData.nama,
+                        kelas: studentData.kelas,
+                        skor: score,
+                        benar: correctCount,
+                        waktu: '12:45',
+                        status: status
+                    })
+                });
+            }
+        }
+
+        function resetEvaluation() {
+            document.getElementById('eval-result-card').classList.add('hidden');
+            document.getElementById('eval-intro-card').classList.remove('hidden');
+        }
+
+        function handleVideoAnalysisSubmit(e) {
+            e.preventDefault();
+            const type = document.getElementById('analysis-attack-type').value;
+            const reason = document.getElementById('analysis-reason').value;
+            const weakness = document.getElementById('analysis-weakness').value;
+            const rec = document.getElementById('analysis-recommendation').value;
+
+            alert('Hasil analisis video berhasil disimpan!');
+
+            if (webAppUrl) {
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveAnalysis',
+                        nama: studentData.nama,
+                        kelas: studentData.kelas,
+                        jenisSerangan: type,
+                        alasan: reason,
+                        kelemahan: weakness,
+                        rekomendasi: rec
+                    })
+                });
+            }
+        }
+
+        function handleReflectionSubmit(e) {
+            e.preventDefault();
+            alert('Refleksi belajar berhasil dikirim!');
+
+            if (webAppUrl) {
+                fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveReflection',
+                        nama: studentData.nama,
+                        kelas: studentData.kelas,
+                        q1: document.getElementById('refl-q1').value,
+                        q2: document.getElementById('refl-q2').value,
+                        q3: document.getElementById('refl-q3').value,
+                        q4: document.getElementById('refl-q4').value
+                    })
+                });
+            }
+        }
+
+        function saveLocalEvalRecap(score, correct, status) {
+            let recaps = JSON.parse(localStorage.getItem('pjok_eval_recaps')) || [];
+            recaps.push({
+                nama: studentData.nama,
+                kelas: studentData.kelas,
+                skor: score,
+                status: status
+            });
+            localStorage.setItem('pjok_eval_recaps', JSON.stringify(recaps));
+            renderStudentRecapTable();
+        }
+
+        function renderStudentRecapTable() {
+            const recaps = JSON.parse(localStorage.getItem('pjok_eval_recaps')) || [
+                { nama: studentData.nama || 'Budi Santoso', kelas: studentData.kelas || 'XII MIPA 1', skor: 85, status: 'TUNTAS' }
+            ];
+
+            const tbody = document.getElementById('student-recap-table-body');
+            tbody.innerHTML = '';
+
+            recaps.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-white">${r.nama}</td>
+                    <td class="p-4">${r.kelas}</td>
+                    <td class="p-4 font-extrabold text-gold-400">${r.skor}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-md font-bold">${r.status}</span></td>
+                    <td class="p-4 text-slate-400">Tersimpan</td>
+                    <td class="p-4 text-slate-400">Lengkap</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function clearLocalStudentData() {
+            if (confirm('Hapus seluruh rekap nilai lokal?')) {
+                localStorage.removeItem('pjok_eval_recaps');
+                renderStudentRecapTable();
+            }
+        }
+
+        function updateOverallProgress() {
+            let progress = 25;
+            if (xpPoints > 0) progress += 25;
+            if (localStorage.getItem('pjok_eval_recaps')) progress += 50;
+            if (progress > 100) progress = 100;
+
+            document.getElementById('overall-progress-bar').style.width = progress + '%';
+            document.getElementById('overall-progress-text').innerText = progress + '%';
+        }
+
+        function promptTeacherMode() {
+            const pwd = prompt('Masukkan Password Guru (Default: pjok12):');
+            if (pwd === 'pjok12') {
+                switchTab('guru');
+            } else {
+                alert('Kata sandi salah!');
+            }
+        }
+
+        function openSetupGuideModal() {
+            document.getElementById('modal-setup').classList.remove('hidden');
+        }
+
+        function openAppsScriptCodeModal() {
+            document.getElementById('modal-appsscript').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function saveConfigurations() {
+            webAppUrl = document.getElementById('cfg-webapp-url').value;
+            spreadsheetUrl = document.getElementById('cfg-sheet-url').value;
+            docUrl = document.getElementById('cfg-doc-url').value;
+
+            localStorage.setItem('pjok_webapp_url', webAppUrl);
+            localStorage.setItem('pjok_sheet_url', spreadsheetUrl);
+            localStorage.setItem('pjok_doc_url', docUrl);
+
+            document.getElementById('link-google-sheet').href = spreadsheetUrl;
+            document.getElementById('link-google-doc').href = docUrl;
+
+            alert('Konfigurasi berhasil disimpan!');
+            closeModal('modal-setup');
+        }
+
+        function copyAppsScriptCode() {
+            const code = document.getElementById('appsscript-code-text').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Kode Google Apps Script berhasil disalin!');
+            });
+        }
+
+        function filterMateri(type) {
+            const items = document.querySelectorAll('.materi-item');
+            items.forEach(el => {
+                if (type === 'all' || el.classList.contains(type)) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
